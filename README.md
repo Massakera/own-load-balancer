@@ -24,7 +24,6 @@ git clone https://github.com/yourusername/own-load-balancer.git
 Navigate to the root directory of the project and run the following command to build and start the services using Docker Compose:
 
 ```bash
-Copy code
 docker-compose up --build
 ```
 
