@@ -1,6 +1,8 @@
 # Simple Load Balancer and Backend Server
 
-This project includes a simple load balancer (`lb`) and a backend server (`backend`) written in Go, which are containerized using Docker. The load balancer forwards incoming HTTP requests to the backend server, which responds with a simple greeting.
+This project includes a simple load balancer (`lb`) and a backend server (`backend`) written in Go, which are containerized using Docker. The load balancer forwards incoming HTTP requests to the backend server, which responds with a simple greeting. 
+
+To be fair, I just did this because I wanted to make a load balancer and I think its fun to build things like this...
 
 ## Getting Started
 
