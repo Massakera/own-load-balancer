@@ -2,15 +2,26 @@ package main
 
 import (
 	"bufio"
-	"io"
 	"log"
 	"net"
 	"net/http"
+	"sync"
 )
+
+var backends = []string{"backend1:8080", "backend2:8081", "backend3:8082"}
+var currentServer int
+var mutex sync.Mutex
+
+func getNextBackend() string {
+	mutex.Lock()
+	defer mutex.Unlock()
+	backend := backends[currentServer]
+	currentServer = (currentServer + 1) % len(backends)
+	return backend
+}
 
 func main() {
 	listenAddr := ":80"
-	backendAddr := "http://backend:8080"
 
 	listener, err := net.Listen("tcp", listenAddr)
 	if err != nil {
@@ -38,7 +49,9 @@ func main() {
 			log.Printf("Received request from %s\n%s %s %s\nHost: %s\nUser-Agent: %s\nAccept: %s\n",
 				c.RemoteAddr(), request.Method, request.URL, request.Proto, request.Host, request.UserAgent(), request.Header.Get("Accept"))
 
-			backendReq, err := http.NewRequest(request.Method, backendAddr+request.URL.String(), nil)
+			backendServer := getNextBackend()
+
+			backendReq, err := http.NewRequest(request.Method, "http://"+backendServer+request.URL.String(), request.Body)
 			if err != nil {
 				log.Printf("Failed to create request for backend: %v", err)
 				return
@@ -46,23 +59,14 @@ func main() {
 
 			backendReq.Header = request.Header
 
-			if request.Body != nil {
-				backendReq.Body = io.NopCloser(request.Body)
-			}
-
-			client := &http.Client{}
-			resp, err := client.Do(backendReq)
+			resp, err := http.DefaultClient.Do(backendReq)
 			if err != nil {
 				log.Printf("Failed to send request to backend: %v", err)
 				return
 			}
 			defer resp.Body.Close()
 
-			err = resp.Write(c)
-			if err != nil {
-				log.Printf("Failed to write response to client: %v", err)
-				return
-			}
+			resp.Write(c)
 		}(conn)
 	}
 }
