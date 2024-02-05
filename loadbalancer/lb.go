@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-var backends = []string{"backend1:8080", "backend2:8081", "backend3:8082"}
+var backends = []string{"backend1:8080", "backend2:8080", "backend3:8080"}
 var currentServer int
 var mutex sync.Mutex
 
